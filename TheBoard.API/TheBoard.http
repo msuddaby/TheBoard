@@ -1,0 +1,6 @@
+@TheBoard_HostAddress = http://localhost:5282
+
+GET {{TheBoard_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

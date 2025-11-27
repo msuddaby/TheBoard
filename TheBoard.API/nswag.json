@@ -1,0 +1,34 @@
+{
+  "runtime": "Net90",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "aspNetCoreToOpenApi": {
+      "project": "TheBoard.API.csproj",
+      "msBuildProjectExtensionsPath": null,
+      "configuration": "$(Configuration)",
+      "runtime": null,
+      "targetFramework": null,
+      "noBuild": true,
+      "verbose": true,
+      "workingDirectory": null,
+      "requireParametersWithoutDefault": false,
+      "apiGroupNames": null,
+      "defaultPropertyNameHandling": "Default",
+      "defaultReferenceTypeNullHandling": "Null",
+      "defaultDictionaryValueReferenceTypeNullHandling": "NotNull",
+      "defaultResponseReferenceTypeNullHandling": "NotNull",
+      "defaultEnumHandling": "Integer",
+      "flattenInheritanceHierarchy": false,
+      "generateKnownTypes": true,
+      "generateEnumMappingDescription": false,
+      "generateXmlObjects": false,
+      "generateAbstractProperties": false,
+      "generateAbstractSchemas": true,
+      "ignoreObsoleteProperties": false,
+      "allowReferencesWithProperties": false,
+      "output": "swagger.json",
+      "newLineBehavior": "Auto"
+    }
+  },
+  "codeGenerators": {}
+}
