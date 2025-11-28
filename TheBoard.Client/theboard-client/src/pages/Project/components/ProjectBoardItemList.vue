@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { BoardItemClient, BoardItemPriorityUpdateVM, type BoardItemVM } from '@/client/theboard-api'
 import BalatroFlame from '@/components/BalatroFlame.vue'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ref } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { hslToRgb } from '@/misc/utilities'
+import BoardItemView from '../BoardItem/BoardItemView.vue'
 
 interface Props {
   projectList: BoardItemVM[]
@@ -11,6 +13,13 @@ interface Props {
 
 const props = defineProps<Props>()
 const projects = ref<BoardItemVM[]>(props.projectList)
+const selectedItem = ref<BoardItemVM | null>(null)
+const sheetOpen = ref(false)
+
+function openItem(item: BoardItemVM) {
+  selectedItem.value = item
+  sheetOpen.value = true
+}
 
 async function onDragEnd() {
   const updates = props.projectList.map((item, index) => {
@@ -39,8 +48,6 @@ function getItemStyle(index: number, totalItems: number): string {
 
 function getFlameColors(index: number, totalItems: number) {
   const baseHue = getItemHue(index, totalItems)
-
-  // All colors match the card - flame effect comes from alpha/noise only
   const cardColor = hslToRgb(baseHue, 40, 30)
 
   return {
@@ -63,6 +70,7 @@ function getFlameColors(index: number, totalItems: number) {
           :key="item.id"
           :style="getItemStyle(index, projects.length)"
           class="relative p-4 mb-4 rounded-lg text-white cursor-move shadow-md"
+          @click="openItem(item)"
         >
           <div v-if="index === 0" class="absolute -top-8 left-0 right-0 h-10">
             <BalatroFlame
@@ -73,9 +81,20 @@ function getFlameColors(index: number, totalItems: number) {
               :fire-aperture="0.22"
             />
           </div>
-          <span class="relative z-10">{{ item.title }} - {{ item.description }}</span>
+          <span class="relative z-10">{{ item.title }}</span>
         </div>
       </VueDraggable>
     </div>
+
+    <Sheet v-model:open="sheetOpen">
+      <SheetContent side="right" class="min-w-[400px] sm:min-w-[1000px]">
+        <SheetHeader>
+          <SheetTitle>{{ selectedItem?.title }}</SheetTitle>
+        </SheetHeader>
+        <div class="mt-6">
+          <BoardItemView v-if="selectedItem" :board-item="selectedItem" />
+        </div>
+      </SheetContent>
+    </Sheet>
   </template>
 </template>

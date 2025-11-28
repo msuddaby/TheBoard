@@ -22,6 +22,13 @@ public class ProjectController : ControllerBase
         return Ok(result);
     }
     
+    [HttpGet("{ProjectId}")]
+    public async Task<ActionResult<ProjectVM>> GetProjectByIdAsync(int ProjectId)
+    {
+        var result = await _projectsService.GetProjectByIdAsync(ProjectId);
+        return Ok(result);
+    }
+    
     [HttpPost]
     public async Task<ActionResult<ProjectVM>> CreateProjectAsync([FromBody] string name)
     {

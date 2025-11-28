@@ -9,6 +9,7 @@ public interface IProjectsService
 {
     Task<List<ProjectVM>> GetAllProjectsAsync();
     Task<ProjectVM> CreateProjectAsync(string name);
+    Task<ProjectVM?> GetProjectByIdAsync(int projectId);
 }
 
 public class ProjectsService : IProjectsService
@@ -26,6 +27,19 @@ public class ProjectsService : IProjectsService
         var projects = await dbContext.Projects.ToListAsync();
         
         return projects.Select(p => new ProjectVM(p)).ToList();
+    }
+    
+    public async Task<ProjectVM?> GetProjectByIdAsync(int projectId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var project = await dbContext.Projects.FindAsync(projectId);
+        
+        if (project == null)
+        {
+            return null;
+        }
+        
+        return new ProjectVM(project);
     }
     
     public async Task<ProjectVM> CreateProjectAsync(string name)

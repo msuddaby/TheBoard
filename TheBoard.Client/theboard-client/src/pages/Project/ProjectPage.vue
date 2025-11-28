@@ -2,7 +2,8 @@
 import { ref, watchEffect } from 'vue'
 import ProjectForm from './components/BoardItemForm.vue'
 import ProjectList from './components/ProjectBoardItemList.vue'
-import { BoardItemClient, type BoardItemVM } from '@/client/theboard-api'
+import { BoardItemClient, ProjectClient, ProjectVM, type BoardItemVM } from '@/client/theboard-api'
+import AutoBreadcrumb from '@/components/AutoBreadcrumb.vue'
 
 interface Props {
   projectId: string
@@ -11,6 +12,21 @@ const props = defineProps<Props>()
 const loading = ref<boolean>(false)
 const projectBoardItems = ref<BoardItemVM[]>([])
 const highestPriority = ref<number>(0)
+const project = ref<ProjectVM>()
+
+async function fetchProject() {
+  try {
+    const client = new ProjectClient('http://localhost:5282')
+    const parsedId = parseInt(props.projectId, 10)
+    if (isNaN(parsedId)) {
+      console.error('Invalid project ID:', props.projectId)
+      return
+    }
+    project.value = await client.getProjectById(parsedId)
+  } catch (error) {
+    console.error('Error fetching project:', error)
+  }
+}
 
 async function fetchBoardItems() {
   loading.value = true
@@ -47,26 +63,30 @@ function getNextPriority(): number {
 }
 
 watchEffect(() => {
+  fetchProject()
   fetchBoardItems()
 })
 </script>
 
 <template>
-  <div></div>
+  <div class="mb-6">
+    <AutoBreadcrumb />
+  </div>
   <template v-if="loading">
     <p>Loading board items...</p>
   </template>
   <template v-else>
-    <div class="mb-6">
+    <div class="mb-12">
       <ProjectForm
         :project-id="props.projectId"
         :get-next-priority="getNextPriority"
+        :project-title="project?.name"
         @boardItemCreated="handleBoardItemCreated"
       />
     </div>
 
     <div class="mb-6">
-      <h2>Project Board Items</h2>
+      <h2 class="mb-12">Project Board Items</h2>
       <ProjectList :project-list="projectBoardItems" />
     </div>
   </template>

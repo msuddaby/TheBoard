@@ -11,8 +11,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <h1>Welcome to TheBoard</h1>
-  <p>Your central hub for managing projects and tasks efficiently.</p>
+  <h2>Project List</h2>
 
   <ProjectsList />
 </template>
