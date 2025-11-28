@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { ProjectClient, ProjectVM } from '@/client/theboard-api'
 import Button from '@/components/ui/button/Button.vue'
+import { toast } from 'vue-sonner'
 import Input from '@/components/ui/input/Input.vue'
 
 const model = ref<ProjectVM>(
@@ -22,7 +23,7 @@ async function onSubmit() {
   try {
     await client.createProject(projectName)
     console.log('Project created successfully')
-    window.alert('Project created successfully')
+    toast.success('Project created successfully')
     model.value.name = ''
     emits('projectCreated')
   } catch (error) {

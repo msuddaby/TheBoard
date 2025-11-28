@@ -12,9 +12,15 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+const emits = defineEmits<{
+  (e: 'projectListUpdated', value: BoardItemVM[]): void
+}>()
+
 const projects = ref<BoardItemVM[]>(props.projectList)
 const selectedItem = ref<BoardItemVM | null>(null)
 const sheetOpen = ref(false)
+const removingItemId = ref<number | null>(null)
 
 function openItem(item: BoardItemVM) {
   selectedItem.value = item
@@ -49,12 +55,30 @@ function getItemStyle(index: number, totalItems: number): string {
 function getFlameColors(index: number, totalItems: number) {
   const baseHue = getItemHue(index, totalItems)
   const cardColor = hslToRgb(baseHue, 40, 30)
-
   return {
     top: cardColor,
     middle: hslToRgb(1, 60, 30),
     bottom: hslToRgb(baseHue, 70, 60),
   }
+}
+
+function onItemDeleted(closeDialog: () => void, boardItemId: number) {
+  closeDialog()
+  animateRemoval(boardItemId)
+}
+
+function onItemMarkedDone(closeDialog: () => void, boardItemId: number) {
+  closeDialog()
+  animateRemoval(boardItemId)
+}
+
+function animateRemoval(boardItemId: number) {
+  removingItemId.value = boardItemId
+  setTimeout(() => {
+    projects.value = projects.value.filter((item) => item.id !== boardItemId)
+    removingItemId.value = null
+    emits('projectListUpdated', projects.value)
+  }, 500) // Match the duration of the CSS animation!
 }
 </script>
 
@@ -69,7 +93,10 @@ function getFlameColors(index: number, totalItems: number) {
           v-for="(item, index) in projects"
           :key="item.id"
           :style="getItemStyle(index, projects.length)"
-          class="relative p-4 mb-4 rounded-lg text-white cursor-move shadow-md"
+          :class="[
+            'relative p-4 mb-4 rounded-lg text-white cursor-move shadow-md transition-all duration-500',
+            removingItemId === item.id ? 'item-removing' : '',
+          ]"
           @click="openItem(item)"
         >
           <div v-if="index === 0" class="absolute -top-8 left-0 right-0 h-10">
@@ -85,16 +112,47 @@ function getFlameColors(index: number, totalItems: number) {
         </div>
       </VueDraggable>
     </div>
-
-    <Sheet v-model:open="sheetOpen">
+    <Sheet v-model:open="sheetOpen" v-slot="{ close: closeDialog }">
       <SheetContent side="right" class="min-w-[400px] sm:min-w-[1000px]">
         <SheetHeader>
           <SheetTitle>{{ selectedItem?.title }}</SheetTitle>
         </SheetHeader>
         <div class="mt-6">
-          <BoardItemView v-if="selectedItem" :board-item="selectedItem" />
+          <BoardItemView
+            v-if="selectedItem"
+            :board-item="selectedItem"
+            :onItemDeleted="(boardItemId) => onItemDeleted(closeDialog, boardItemId)"
+            :onItemMarkedDone="(boardItemId) => onItemMarkedDone(closeDialog, boardItemId)"
+          />
         </div>
       </SheetContent>
     </Sheet>
   </template>
 </template>
+
+<style scoped>
+.item-removing {
+  animation: slideOutAndFade 0.5s ease-out forwards;
+}
+
+@keyframes slideOutAndFade {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    max-height: 200px;
+    margin-bottom: 1rem;
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(100px) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(200px) scale(0.8);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+</style>

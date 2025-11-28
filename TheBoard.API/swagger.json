@@ -109,6 +109,72 @@
         }
       }
     },
+    "/v1/BoardItem/MarkAsCompleted/{boardItemId}": {
+      "post": {
+        "tags": [
+          "BoardItem"
+        ],
+        "operationId": "BoardItem_MarkBoardItemAsCompleted",
+        "parameters": [
+          {
+            "name": "boardItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/BoardItem/{boardItemId}": {
+      "delete": {
+        "tags": [
+          "BoardItem"
+        ],
+        "operationId": "BoardItem_DeleteBoardItem",
+        "parameters": [
+          {
+            "name": "boardItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/Project/Projects": {
       "get": {
         "tags": [
@@ -189,6 +255,39 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProjectVM"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/Project/{projectId}": {
+      "delete": {
+        "tags": [
+          "Project"
+        ],
+        "operationId": "Project_DeleteProject",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }

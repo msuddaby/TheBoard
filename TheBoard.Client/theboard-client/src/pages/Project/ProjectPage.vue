@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import ProjectForm from './components/BoardItemForm.vue'
 import ProjectList from './components/ProjectBoardItemList.vue'
 import { BoardItemClient, ProjectClient, ProjectVM, type BoardItemVM } from '@/client/theboard-api'
@@ -56,10 +56,14 @@ function handleBoardItemCreated() {
   fetchBoardItems()
 }
 
-function getNextPriority(): number {
+const nextPriority = computed(() => {
   return projectBoardItems.value.length > 0
     ? Math.max(...projectBoardItems.value.map((item) => item.priority)) + 1
     : 0
+})
+function projectBoardItemsUpdated(newList: BoardItemVM[]) {
+  console.log('Project board items updated:', newList)
+  projectBoardItems.value = newList
 }
 
 watchEffect(() => {
@@ -79,7 +83,7 @@ watchEffect(() => {
     <div class="mb-12">
       <ProjectForm
         :project-id="props.projectId"
-        :get-next-priority="getNextPriority"
+        :next-priority="nextPriority"
         :project-title="project?.name"
         @boardItemCreated="handleBoardItemCreated"
       />
@@ -87,7 +91,10 @@ watchEffect(() => {
 
     <div class="mb-6">
       <h2 class="mb-12">Project Board Items</h2>
-      <ProjectList :project-list="projectBoardItems" />
+      <ProjectList
+        :project-list="projectBoardItems"
+        @projectListUpdated="projectBoardItemsUpdated"
+      />
     </div>
   </template>
 </template>

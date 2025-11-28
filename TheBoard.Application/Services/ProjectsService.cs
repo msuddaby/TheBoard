@@ -10,6 +10,7 @@ public interface IProjectsService
     Task<List<ProjectVM>> GetAllProjectsAsync();
     Task<ProjectVM> CreateProjectAsync(string name);
     Task<ProjectVM?> GetProjectByIdAsync(int projectId);
+    Task DeleteProjectAsync(int projectId);
 }
 
 public class ProjectsService : IProjectsService
@@ -55,6 +56,21 @@ public class ProjectsService : IProjectsService
         await dbContext.SaveChangesAsync();
         
         return new ProjectVM(project);
+    }
+
+    public async Task DeleteProjectAsync(int projectId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var project = await dbContext.Projects.FindAsync(projectId);
+        
+        if (project == null)
+        {
+            throw new Exception("Project not found");
+        }
+        
+        dbContext.Projects.Remove(project);
+        await dbContext.SaveChangesAsync();
+        
     }
     
     

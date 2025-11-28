@@ -42,4 +42,18 @@ public class BoardItemController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    [HttpPost("MarkAsCompleted/{boardItemId}")]
+    public async Task<ActionResult> MarkBoardItemAsCompletedAsync(int boardItemId) 
+    {
+        await _boardItemsService.MarkBoardItemAsCompletedAsync(boardItemId);
+        return Ok();
+    }
+
+    [HttpDelete("{boardItemId}")]
+    public async Task<ActionResult> DeleteBoardItemAsync(int boardItemId)
+    {
+        await _boardItemsService.DeleteBoardItemAsync(boardItemId);
+        return Ok();
+    }
 }

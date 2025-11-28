@@ -11,12 +11,13 @@ import Input from '@/components/ui/input/Input.vue'
 import Label from '@/components/ui/label/Label.vue'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { toast } from 'vue-sonner'
 
 interface Props {
   projectId: string
   projectTitle?: string
-  getNextPriority: () => number
+  nextPriority: number
 }
 
 const props = defineProps<Props>()
@@ -24,9 +25,16 @@ const boardItemModel = ref<BoardItemCreateVM>(
   new BoardItemCreateVM({
     title: '',
     description: '',
-    priority: props.getNextPriority(),
+    priority: props.nextPriority,
     projectId: parseInt(props.projectId, 10),
   }),
+)
+
+watch(
+  () => props.nextPriority,
+  (newPriority) => {
+    boardItemModel.value.priority = newPriority
+  },
 )
 
 const emits = defineEmits<{
@@ -37,10 +45,10 @@ async function createBoardItem() {
   const client = new BoardItemClient('http://localhost:5282')
   try {
     await client.createBoardItem(boardItemModel.value)
-    window.alert('Board item created successfully!')
+    toast.success('Board item created successfully!')
     boardItemModel.value.title = ''
     boardItemModel.value.description = ''
-    boardItemModel.value.priority = props.getNextPriority()
+    boardItemModel.value.priority = props.nextPriority
     boardItemModel.value.projectId = parseInt(props.projectId, 10)
     emits('boardItemCreated')
   } catch (error) {

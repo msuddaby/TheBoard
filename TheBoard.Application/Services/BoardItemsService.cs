@@ -9,6 +9,8 @@ public interface IBoardItemsService
     Task<List<BoardItemVM>> GetBoardItemsByProjectIdAsync(int projectId);
     Task<BoardItemVM> CreateBoardItemAsync(BoardItemCreateVM boardItemCreateVM);
     Task UpdateBoardItemPrioritiesAsync(List<BoardItemPriorityUpdateVM> updates);
+    Task MarkBoardItemAsCompletedAsync(int boardItemId);
+    Task DeleteBoardItemAsync(int boardItemId);
 }
 
 public class BoardItemsService : IBoardItemsService
@@ -24,7 +26,7 @@ public class BoardItemsService : IBoardItemsService
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         var boardItems = await dbContext.BoardItems
-            .Where(bi => bi.ProjectId == projectId)
+            .Where(bi => bi.ProjectId == projectId && !bi.IsCompleted)
             .ToListAsync();
         
         return boardItems.Select(bi => new BoardItemVM(bi)).ToList();
@@ -62,6 +64,34 @@ public class BoardItemsService : IBoardItemsService
             item.Priority = update.NewPriority;
         }
     
+        await dbContext.SaveChangesAsync();
+    }
+    
+    public async Task MarkBoardItemAsCompletedAsync(int boardItemId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        var boardItem = await dbContext.BoardItems.FindAsync(boardItemId);
+        if (boardItem == null)
+        {
+            throw new Exception("Board item not found");
+        }
+        
+        boardItem.IsCompleted = true;
+        await dbContext.SaveChangesAsync();
+    }
+    
+    public async Task DeleteBoardItemAsync(int boardItemId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        var boardItem = await dbContext.BoardItems.FindAsync(boardItemId);
+        if (boardItem == null)
+        {
+            throw new Exception("Board item not found");
+        }
+        
+        dbContext.BoardItems.Remove(boardItem);
         await dbContext.SaveChangesAsync();
     }
 }

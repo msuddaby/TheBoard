@@ -35,4 +35,11 @@ public class ProjectController : ControllerBase
         var result = await _projectsService.CreateProjectAsync(name);
         return Ok(result);
     }
+
+    [HttpDelete("{projectId}")]
+    public async Task<ActionResult> DeleteProjectAsync(int projectId)
+    {
+        await _projectsService.DeleteProjectAsync(projectId);
+        return Ok();
+    }
 }

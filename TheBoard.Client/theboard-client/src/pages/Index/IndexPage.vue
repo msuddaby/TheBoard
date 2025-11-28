@@ -11,7 +11,5 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <h2>Project List</h2>
-
   <ProjectsList />
 </template>
