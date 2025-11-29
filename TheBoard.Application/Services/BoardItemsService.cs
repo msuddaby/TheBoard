@@ -11,6 +11,7 @@ public interface IBoardItemsService
     Task UpdateBoardItemPrioritiesAsync(List<BoardItemPriorityUpdateVM> updates);
     Task MarkBoardItemAsCompletedAsync(int boardItemId);
     Task DeleteBoardItemAsync(int boardItemId);
+    Task<BoardItemVM> UpdateBoardItemAsync(BoardItemCreateVM boardItemUpdateVM);
 }
 
 public class BoardItemsService : IBoardItemsService
@@ -41,6 +42,21 @@ public class BoardItemsService : IBoardItemsService
         dbContext.BoardItems.Add(boardItem);
         await dbContext.SaveChangesAsync();
         
+        return new BoardItemVM(boardItem);
+    }
+
+    public async Task<BoardItemVM> UpdateBoardItemAsync(BoardItemCreateVM boardItemUpdateVM)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var boardItem = await dbContext.BoardItems.FindAsync(boardItemUpdateVM.Id);
+        if (boardItem == null)
+        {
+            throw new Exception("Board item not found");
+        }
+        boardItem.Title = boardItemUpdateVM.Title;
+        boardItem.Description = boardItemUpdateVM.Description;
+        boardItem.Priority = boardItemUpdateVM.Priority;
+        await dbContext.SaveChangesAsync();
         return new BoardItemVM(boardItem);
     }
     
@@ -78,6 +94,7 @@ public class BoardItemsService : IBoardItemsService
         }
         
         boardItem.IsCompleted = true;
+        boardItem.CompletedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
     }
     

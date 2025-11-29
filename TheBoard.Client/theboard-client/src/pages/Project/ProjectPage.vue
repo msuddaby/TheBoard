@@ -2,8 +2,9 @@
 import { computed, ref, watchEffect } from 'vue'
 import ProjectForm from './components/BoardItemForm.vue'
 import ProjectList from './components/ProjectBoardItemList.vue'
-import { BoardItemClient, ProjectClient, ProjectVM, type BoardItemVM } from '@/client/theboard-api'
+import { ProjectVM, type BoardItemVM } from '@/client/theboard-api'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb.vue'
+import { createBoardItemClient, createProjectClient } from '@/client/api-client'
 
 interface Props {
   projectId: string
@@ -14,15 +15,17 @@ const projectBoardItems = ref<BoardItemVM[]>([])
 const highestPriority = ref<number>(0)
 const project = ref<ProjectVM>()
 
+const boardItemClient = createBoardItemClient()
+const projectClient = createProjectClient()
+
 async function fetchProject() {
   try {
-    const client = new ProjectClient('http://localhost:5282')
     const parsedId = parseInt(props.projectId, 10)
     if (isNaN(parsedId)) {
       console.error('Invalid project ID:', props.projectId)
       return
     }
-    project.value = await client.getProjectById(parsedId)
+    project.value = await projectClient.getProjectById(parsedId)
   } catch (error) {
     console.error('Error fetching project:', error)
   }
@@ -37,8 +40,7 @@ async function fetchBoardItems() {
       loading.value = false
       return
     }
-    const client = new BoardItemClient('http://localhost:5282')
-    const items = await client.getBoardItemsByProjectId(parsedId)
+    const items = await boardItemClient.getBoardItemsByProjectId(parsedId)
     const sortedItems = items.sort((a, b) => a.priority - b.priority)
     projectBoardItems.value = sortedItems
     highestPriority.value =

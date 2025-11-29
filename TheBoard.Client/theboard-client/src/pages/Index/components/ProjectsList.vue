@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ProjectClient, ProjectVM } from '@/client/theboard-api'
+import { ProjectVM } from '@/client/theboard-api'
 import { ref, watchEffect } from 'vue'
 import ProjectForm from './ProjectForm.vue'
 import Card from '@/components/ui/card/Card.vue'
 import CardHeader from '@/components/ui/card/CardHeader.vue'
 import CardTitle from '@/components/ui/card/CardTitle.vue'
 import router from '@/router'
+import { createProjectClient } from '@/client/api-client'
 
 const projects = ref<ProjectVM[]>([])
+
+const projectClient = createProjectClient()
 
 watchEffect(async () => {
   try {
@@ -19,7 +22,7 @@ watchEffect(async () => {
 
 async function refreshProjects() {
   try {
-    const response = await new ProjectClient('http://localhost:5282').getAllProjects()
+    const response = await projectClient.getAllProjects()
     projects.value = response
   } catch (error) {
     console.error('Error fetching projects:', error)

@@ -4,6 +4,7 @@ namespace TheBoard.Services.Models.BoardItems;
 
 public class BoardItemCreateVM
 {
+    public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int ProjectId { get; set; }
@@ -13,6 +14,7 @@ public class BoardItemCreateVM
     {
         return new BoardItem()
         {
+            Id = this.Id,
             CreatedAt = DateTime.UtcNow,
             Title = this.Title,
             Description = this.Description,

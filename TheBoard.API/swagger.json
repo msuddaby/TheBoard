@@ -73,6 +73,81 @@
         }
       }
     },
+    "/v1/BoardItem/{boardItemId}": {
+      "put": {
+        "tags": [
+          "BoardItem"
+        ],
+        "operationId": "BoardItem_UpdateBoardItem",
+        "parameters": [
+          {
+            "name": "boardItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "boardItemUpdateVM",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardItemCreateVM"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardItemVM"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "BoardItem"
+        ],
+        "operationId": "BoardItem_DeleteBoardItem",
+        "parameters": [
+          {
+            "name": "boardItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/BoardItem/BatchUpdatePriority": {
       "post": {
         "tags": [
@@ -115,39 +190,6 @@
           "BoardItem"
         ],
         "operationId": "BoardItem_MarkBoardItemAsCompleted",
-        "parameters": [
-          {
-            "name": "boardItemId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/BoardItem/{boardItemId}": {
-      "delete": {
-        "tags": [
-          "BoardItem"
-        ],
-        "operationId": "BoardItem_DeleteBoardItem",
         "parameters": [
           {
             "name": "boardItemId",
@@ -365,12 +407,17 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "id",
           "title",
           "description",
           "projectId",
           "priority"
         ],
         "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
           "title": {
             "type": "string"
           },

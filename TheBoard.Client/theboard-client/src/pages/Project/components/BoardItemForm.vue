@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { BoardItemClient, BoardItemCreateVM } from '@/client/theboard-api'
+import { createBoardItemClient } from '@/client/api-client'
+import { BoardItemCreateVM, BoardItemVM } from '@/client/theboard-api'
 import Button from '@/components/ui/button/Button.vue'
 import Dialog from '@/components/ui/dialog/Dialog.vue'
 import DialogContent from '@/components/ui/dialog/DialogContent.vue'
@@ -18,50 +19,75 @@ interface Props {
   projectId: string
   projectTitle?: string
   nextPriority: number
+  currentData?: BoardItemCreateVM
+  hideButton?: boolean
 }
 
 const props = defineProps<Props>()
+
+const open = ref(false)
+
 const boardItemModel = ref<BoardItemCreateVM>(
-  new BoardItemCreateVM({
-    title: '',
-    description: '',
-    priority: props.nextPriority,
-    projectId: parseInt(props.projectId, 10),
-  }),
+  props.currentData ??
+    new BoardItemCreateVM({
+      id: 0,
+      title: '',
+      description: '',
+      priority: props.nextPriority,
+      projectId: parseInt(props.projectId, 10),
+    }),
 )
 
 watch(
   () => props.nextPriority,
   (newPriority) => {
+    console.log('Updating priority to:', newPriority)
     boardItemModel.value.priority = newPriority
   },
 )
 
 const emits = defineEmits<{
   (e: 'boardItemCreated'): void
+  (e: 'boardItemUpdated', item: BoardItemVM): void
 }>()
 
+const boardItemClient = createBoardItemClient()
+
 async function createBoardItem() {
-  const client = new BoardItemClient('http://localhost:5282')
   try {
-    await client.createBoardItem(boardItemModel.value)
-    toast.success('Board item created successfully!')
+    if (props.currentData != null) {
+      const result = await boardItemClient.updateBoardItem(
+        props.currentData.id,
+        boardItemModel.value,
+      )
+      toast.success('Board item updated successfully!')
+      emits('boardItemUpdated', result)
+    } else {
+      await boardItemClient.createBoardItem(boardItemModel.value)
+      toast.success('Board item created successfully!')
+      emits('boardItemCreated')
+    }
     boardItemModel.value.title = ''
     boardItemModel.value.description = ''
     boardItemModel.value.priority = props.nextPriority
     boardItemModel.value.projectId = parseInt(props.projectId, 10)
-    emits('boardItemCreated')
   } catch (error) {
     console.error('Error creating board item:', error)
   }
 }
+
+defineExpose({
+  openDialog: () => {
+    open.value = true
+  },
+})
 </script>
 
 <template>
   <div>
-    <h2 class="mb-6">Create New Board Item for {{ props.projectTitle }}</h2>
-    <Dialog>
-      <DialogTrigger as-child>
+    <h2 v-if="!hideButton" class="mb-6">Create New Board Item for {{ props.projectTitle }}</h2>
+    <Dialog v-model:open="open">
+      <DialogTrigger v-if="!hideButton" as-child>
         <Button class="cursor-pointer" size="lg">Create Board Item</Button>
       </DialogTrigger>
       <DialogContent class="sm:max-w-[425px] lg:max-w-[1200px]">
@@ -90,7 +116,7 @@ async function createBoardItem() {
             <Label for="priority">Priority</Label>
             <Input id="priority" v-model="boardItemModel.priority" type="number" />
           </div>
-          <Button type="submit">Create Board Item</Button>
+          <Button type="submit">{{ props.currentData ? 'Update' : 'Create' }} Board Item</Button>
         </form>
       </DialogContent>
     </Dialog>

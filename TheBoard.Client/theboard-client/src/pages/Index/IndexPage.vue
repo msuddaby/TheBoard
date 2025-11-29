@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { ProjectClient } from '@/client/theboard-api'
 import { onMounted } from 'vue'
 import ProjectsList from './components/ProjectsList.vue'
+import { createProjectClient } from '@/client/api-client'
+
+const projectClient = createProjectClient()
 
 onMounted(async () => {
-  const client = new ProjectClient('http://localhost:5282')
-
-  const result = await client.getAllProjects()
+  const result = await projectClient.getAllProjects()
   console.log('Projects:', result)
 })
 </script>

@@ -99,6 +99,88 @@ export class BoardItemClient {
         return Promise.resolve<BoardItemVM>(null as any);
     }
 
+    updateBoardItem(boardItemId: number, boardItemUpdateVM: BoardItemCreateVM): Promise<BoardItemVM> {
+        let url_ = this.baseUrl + "/v1/BoardItem/{boardItemId}";
+        if (boardItemId === undefined || boardItemId === null)
+            throw new globalThis.Error("The parameter 'boardItemId' must be defined.");
+        url_ = url_.replace("{boardItemId}", encodeURIComponent("" + boardItemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(boardItemUpdateVM);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateBoardItem(_response);
+        });
+    }
+
+    protected processUpdateBoardItem(response: Response): Promise<BoardItemVM> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BoardItemVM.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BoardItemVM>(null as any);
+    }
+
+    deleteBoardItem(boardItemId: number): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/v1/BoardItem/{boardItemId}";
+        if (boardItemId === undefined || boardItemId === null)
+            throw new globalThis.Error("The parameter 'boardItemId' must be defined.");
+        url_ = url_.replace("{boardItemId}", encodeURIComponent("" + boardItemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeleteBoardItem(_response);
+        });
+    }
+
+    protected processDeleteBoardItem(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
     updateBoardItemPriority(updates: BoardItemPriorityUpdateVM[]): Promise<FileResponse> {
         let url_ = this.baseUrl + "/v1/BoardItem/BatchUpdatePriority";
         url_ = url_.replace(/[?&]$/, "");
@@ -161,47 +243,6 @@ export class BoardItemClient {
     }
 
     protected processMarkBoardItemAsCompleted(response: Response): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<FileResponse>(null as any);
-    }
-
-    deleteBoardItem(boardItemId: number): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/v1/BoardItem/{boardItemId}";
-        if (boardItemId === undefined || boardItemId === null)
-            throw new globalThis.Error("The parameter 'boardItemId' must be defined.");
-        url_ = url_.replace("{boardItemId}", encodeURIComponent("" + boardItemId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "DELETE",
-            headers: {
-                "Accept": "application/octet-stream"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processDeleteBoardItem(_response);
-        });
-    }
-
-    protected processDeleteBoardItem(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200 || status === 206) {
@@ -505,6 +546,7 @@ export interface IBoardItemVM {
 }
 
 export class BoardItemCreateVM implements IBoardItemCreateVM {
+    id!: number;
     title!: string;
     description!: string;
     projectId!: number;
@@ -521,6 +563,7 @@ export class BoardItemCreateVM implements IBoardItemCreateVM {
 
     init(_data?: any) {
         if (_data) {
+            this.id = _data["id"];
             this.title = _data["title"];
             this.description = _data["description"];
             this.projectId = _data["projectId"];
@@ -537,6 +580,7 @@ export class BoardItemCreateVM implements IBoardItemCreateVM {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
         data["title"] = this.title;
         data["description"] = this.description;
         data["projectId"] = this.projectId;
@@ -546,6 +590,7 @@ export class BoardItemCreateVM implements IBoardItemCreateVM {
 }
 
 export interface IBoardItemCreateVM {
+    id: number;
     title: string;
     description: string;
     projectId: number;

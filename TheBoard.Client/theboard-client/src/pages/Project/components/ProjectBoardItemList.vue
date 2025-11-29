@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { BoardItemClient, BoardItemPriorityUpdateVM, type BoardItemVM } from '@/client/theboard-api'
+import { BoardItemPriorityUpdateVM, type BoardItemVM } from '@/client/theboard-api'
 import BalatroFlame from '@/components/BalatroFlame.vue'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ref } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { hslToRgb } from '@/misc/utilities'
 import BoardItemView from '../BoardItem/BoardItemView.vue'
+import { createBoardItemClient } from '@/client/api-client'
 
 interface Props {
   projectList: BoardItemVM[]
@@ -22,6 +23,8 @@ const selectedItem = ref<BoardItemVM | null>(null)
 const sheetOpen = ref(false)
 const removingItemId = ref<number | null>(null)
 
+const client = createBoardItemClient()
+
 function openItem(item: BoardItemVM) {
   selectedItem.value = item
   sheetOpen.value = true
@@ -35,7 +38,6 @@ async function onDragEnd() {
     return update
   })
   try {
-    const client = new BoardItemClient('http://localhost:5282')
     await client.updateBoardItemPriority(updates)
   } catch (error) {
     console.error('Error updating board item priorities:', error)
@@ -70,6 +72,17 @@ function onItemDeleted(closeDialog: () => void, boardItemId: number) {
 function onItemMarkedDone(closeDialog: () => void, boardItemId: number) {
   closeDialog()
   animateRemoval(boardItemId)
+}
+
+function onItemEdited(closeDialog: () => void, boardItem: BoardItemVM) {
+  closeDialog()
+  console.log('ProjectBoardItemList - onItemEdited:', boardItem)
+  const index = projects.value.findIndex((item) => item.id === boardItem.id)
+  if (index !== -1) {
+    projects.value[index] = boardItem
+    selectedItem.value = boardItem
+    emits('projectListUpdated', projects.value)
+  }
 }
 
 function animateRemoval(boardItemId: number) {
@@ -123,6 +136,7 @@ function animateRemoval(boardItemId: number) {
             :board-item="selectedItem"
             :onItemDeleted="(boardItemId) => onItemDeleted(closeDialog, boardItemId)"
             :onItemMarkedDone="(boardItemId) => onItemMarkedDone(closeDialog, boardItemId)"
+            :onItemEdited="(boardItem) => onItemEdited(closeDialog, boardItem)"
           />
         </div>
       </SheetContent>

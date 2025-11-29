@@ -28,6 +28,13 @@ public class BoardItemController : ControllerBase
         var result = await _boardItemsService.CreateBoardItemAsync(boardItemCreateVM);
         return Ok(result);
     }
+    
+    [HttpPut("{boardItemId}")]
+    public async Task<ActionResult<BoardItemVM>> UpdateBoardItemAsync([FromRoute] int boardItemId, [FromBody] BoardItemCreateVM boardItemUpdateVM)
+    {
+        var result =  await _boardItemsService.UpdateBoardItemAsync(boardItemUpdateVM);
+        return Ok(result);
+    }
 
     [HttpPost("BatchUpdatePriority")]
     public async Task<ActionResult> UpdateBoardItemPriorityAsync([FromBody] List<BoardItemPriorityUpdateVM> updates)

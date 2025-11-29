@@ -1,19 +1,26 @@
 <script lang="ts" setup>
-import { BoardItemClient, type BoardItemVM } from '@/client/theboard-api'
+import { type BoardItemVM } from '@/client/theboard-api'
 import DeleteModal from '@/components/DeleteModal.vue'
 import Button from '@/components/ui/button/Button.vue'
 import { MdPreview } from 'md-editor-v3'
 import { toast } from 'vue-sonner'
+import BoardItemForm from '../components/BoardItemForm.vue'
+import { ref } from 'vue'
+import { createBoardItemClient } from '@/client/api-client'
 
 interface Props {
   boardItem: BoardItemVM
   onItemDeleted: (itemId: number) => void
   onItemMarkedDone: (itemId: number) => void
+  onItemEdited: (item: BoardItemVM) => void
 }
 const props = defineProps<Props>()
 
+const boardItemFormRef = ref<InstanceType<typeof BoardItemForm>>()
+
+const client = createBoardItemClient()
+
 async function markAsDone() {
-  const client = new BoardItemClient('http://localhost:5282')
   try {
     await client.markBoardItemAsCompleted(props.boardItem.id)
     toast.success('Board item marked as done!')
@@ -24,7 +31,6 @@ async function markAsDone() {
 }
 
 async function deleteBoardItem() {
-  const client = new BoardItemClient('http://localhost:5282')
   try {
     const idToDelete = props.boardItem.id
     await client.deleteBoardItem(idToDelete)
@@ -34,6 +40,10 @@ async function deleteBoardItem() {
     console.error('Error deleting board item:', error)
     toast.error('Failed to delete board item.')
   }
+}
+
+function itemEdited(item: BoardItemVM) {
+  props.onItemEdited(item)
 }
 </script>
 
@@ -46,11 +56,25 @@ async function deleteBoardItem() {
   <div>
     <div class="flex">
       <div class="p-3">
-        <Button @click="markAsDone">Mark as Done</Button>
+        <Button variant="default" @click="boardItemFormRef?.openDialog()">Edit</Button>
+      </div>
+      <div class="p-3">
+        <Button variant="secondary" @click="markAsDone">Mark as Done</Button>
       </div>
       <div class="p-3">
         <DeleteModal deleteItem="board item" :onDeleteConfirmed="deleteBoardItem" />
       </div>
     </div>
   </div>
+
+  <BoardItemForm
+    ref="boardItemFormRef"
+    :projectId="props.boardItem.projectId.toString()"
+    :projectTitle="props.boardItem.title"
+    :nextPriority="props.boardItem.priority + 1"
+    :currentData="props.boardItem"
+    :hideButton="true"
+    @boardItemCreated="() => {}"
+    @boardItemUpdated="itemEdited"
+  />
 </template>

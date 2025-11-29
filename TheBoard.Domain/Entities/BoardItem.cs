@@ -10,4 +10,5 @@ public class BoardItem
     public virtual Project Project { get; set; } = null!;
     public int Priority { get; set; }
     public bool IsCompleted { get; set; }
+    public DateTime? CompletedAt { get; set; }
 }
