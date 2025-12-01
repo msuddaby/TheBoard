@@ -1,0 +1,17 @@
+﻿services:
+  theboard.api:
+    image: theboard.api
+    build:
+      context: .
+      dockerfile: TheBoard.API/Dockerfile
+    ports:
+      - "9000:8080"
+  theboard.client:
+    image: theboard.client
+    build:
+      context: TheBoard.Client/theboard-client/
+      dockerfile: dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - theboard.api

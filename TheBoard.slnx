@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.yaml" />
+  </Folder>
   <Project Path="TheBoard.API\TheBoard.API.csproj" />
   <Project Path="TheBoard.Application\TheBoard.Application.csproj" />
   <Project Path="TheBoard.Domain/TheBoard.Domain.csproj" />
