@@ -6,6 +6,8 @@
       dockerfile: TheBoard.API/Dockerfile
     ports:
       - "9000:8080"
+    volumes:
+        - ./db:/app/db
   theboard.client:
     image: theboard.client
     build:
